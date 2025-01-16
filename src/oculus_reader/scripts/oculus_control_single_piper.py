@@ -81,7 +81,7 @@ class VR:
     def calc_pose_incre(self,base_pose, pose_data):
         begin_matrix = self.tools.xyzrpy2Mat(base_pose[0], base_pose[1], base_pose[2],
                                                     base_pose[3], base_pose[4], base_pose[5])
-        zero_matrix = self.tools.xyzrpy2Mat(0.05, 0.263, 0.2, 0, 0, 0)
+        zero_matrix = self.tools.xyzrpy2Mat(0.05, 0.0, 0.2, 0, 0, 0)
         end_matrix = self.tools.xyzrpy2Mat(pose_data[0], pose_data[1], pose_data[2],
                                                 pose_data[3], pose_data[4], pose_data[5])
         result_matrix = np.dot(zero_matrix, np.dot(np.linalg.inv(begin_matrix), end_matrix))
