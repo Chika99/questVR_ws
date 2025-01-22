@@ -14,7 +14,27 @@
 
 ### 准备工作 
 
-将代码克隆到 ROS 下的工作空间：
+1、安装依赖
+
+```bash
+conda create -n tr python=3.9
+
+conda activate tr
+
+conda install pinocchio -c conda-forge
+
+pip install meshcat 
+
+pip install casadi
+```
+
+2、配置您的 quest 设备
+
+请参考该链接配置 quest 设备。
+
+点击：[oculus_reader](https://github.com/rail-berkeley/oculus_reader)
+
+3、将代码克隆到 ROS 下的工作空间：
 
 ```bash
 git clone https://github.com/RoboPPN/questVR.git   #quest2遥操作代码
@@ -28,10 +48,9 @@ git clone git@github.com:agilexrobotics/Piper_ros.git  	  #piper机械臂代码
 
 有关更多信息，您可以参考 [開始使用 Meta Quest 2](https://www.meta.com/zh-tw/help/quest/articles/getting-started/getting-started-with-quest-2/?srsltid=AfmBOoqvDcwTtPt2P9o6y3qdXT_9zxz4m8yyej4uwLGEXVXv6KAr3QQz) 、[Piper_ros](https://github.com/agilexrobotics/Piper_ros)、[oculus_reader](https://github.com/rail-berkeley/oculus_reader)、 [lifting_ws](https://github.com/agilexrobotics/lifting_ws)。
 
-
 ### oculus_reader
 
-该存储库提供了从 Quest2 读取位置和按下按钮的工具。
+该存储库提供了从 Quest 设备读取位置和按下按钮的工具。
 
 以VR眼镜作为基站，将手柄的与基站的TF关系传输给机械臂。
 
