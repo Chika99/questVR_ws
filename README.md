@@ -54,6 +54,14 @@ git clone git@github.com:agilexrobotics/Piper_ros.git  	  #piper机械臂代码
 
 以VR眼镜作为基站，将手柄的与基站的TF关系传输给机械臂。
 
+## meta quest 头盔内直接安装 android apk 的方法
+
+[步骤1] 到meta商店安装Mobile VR Station 这个应用
+
+[步骤2] 把要安装的android apk 档案放到根目录Dowanload 里面(meta浏览器预设的下载目录) ，影片里建议直接安装apkpure 商店( [https://m.apkpure.com/tw/)](https://ref.gamer.com.tw/redir.php?url=https%3A%2F%2Fm.apkpure.com%2Ftw%2F))，即可之后都从apkpure 商店里面安装其他热门android 应用
+
+[步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点两下进行安装
+
 ## 软件启动
 
 将上述克隆下来的三份代码放在同一个工作空间进行编译，随后在`~/catkin_ws/src/oculus_reader/scripts`目录下对代码文件进行修改。
