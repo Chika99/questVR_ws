@@ -12,7 +12,9 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 import os
 import sys
 import cv2
+import threading
 from piper_control import PIPER
+from piper_msgs.msg import PosCmd
 
 piper_control = PIPER()
 
@@ -20,11 +22,12 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 
+
 class Arm_IK:
     def __init__(self):
         np.set_printoptions(precision=5, suppress=True, linewidth=200)
 
-        urdf_path = '/home/ppn/teleoperation_ws/src/cobot_remote/piper_arm/urdf/piper_description.urdf'
+        urdf_path = '/home/agilex/piper_ws/src/piper_description/urdf/piper_description.urdf'
     
         self.robot = pin.RobotWrapper.BuildFromURDF(urdf_path)
 
@@ -199,7 +202,7 @@ class Arm_IK:
         # print("collision:", collision)
         return collision
 
-    def get_ik_solution(self, x,y,z,roll,pitch,yaw,gripper):
+    def get_ik_solution(self, x,y,z,roll,pitch,yaw):
         
         q = quaternion_from_euler(roll, pitch, yaw)
         target = pin.SE3(
@@ -210,15 +213,41 @@ class Arm_IK:
         # print("result:", sol_q)
         
         if get_result :
-            piper_control.joint_control_piper(sol_q[0],sol_q[1],sol_q[2],sol_q[3],sol_q[4],sol_q[5],gripper)
+            piper_control.joint_control_piper(sol_q[0],sol_q[1],sol_q[2],sol_q[3],sol_q[4],sol_q[5],0)
         else :
             print("collision!!!")
+    
+class C_PiperIK():
+    def __init__(self):
+        rospy.init_node('inverse_solution_node', anonymous=True)
+        # 创建Arm_IK实例
+        self.arm_ik = Arm_IK()
+        
+        # 启动订阅线程
+        sub_pos_th = threading.Thread(target=self.SubPosThread)
+        sub_pos_th.daemon = True
+        sub_pos_th.start()
+    
+    def SubPosThread(self):
+        # 创建订阅者，监听PosCmd类型的消息
+        rospy.Subscriber('pin_pos_cmd', PosCmd, self.pos_cmd_callback)
+        rospy.spin()
 
+    def pos_cmd_callback(self, msg):
+        # 获取PosCmd类型消息中的数据
+        x = msg.x
+        y = msg.y
+        z = msg.z
+        roll = msg.roll
+        pitch = msg.pitch
+        yaw = msg.yaw
+
+        # 调用Arm_IK类的逆解函数
+        self.arm_ik.get_ik_solution(x, y, z, roll, pitch, yaw)
 
 if __name__ == "__main__":
-    rospy.init_node('inverse_solution_node', anonymous=True)
-    
-    # arm_ik = Arm_IK()
-    rospy.spin()
+    piper_ik = C_PiperIK()
+    while True:
+        pass
 
 

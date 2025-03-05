@@ -3,18 +3,28 @@
 
 import rospy
 from sensor_msgs.msg import JointState
-# from piper_msgs.msg import PosCmd
+from piper_msgs.msg import PosCmd
 from std_msgs.msg import Header
+
+# float64 x
+# float64 y
+# float64 z
+# float64 roll
+# float64 pitch
+# float64 yaw
+# float64 gripper    # 单位：米    范围：0 ~ 0.08米
+# int32 mode1
+# int32 mode2
 
 class PIPER:
     def __init__(self):
         
         # 发布控制piper机械臂话题
-        # self.pub_descartes = rospy.Publisher('pos_cmd', PosCmd, queue_size=10)
+        self.pub_descartes = rospy.Publisher('pos_cmd', PosCmd, queue_size=10)
         self.pub_joint = rospy.Publisher('/joint_states', JointState, queue_size=10)
         self.left_pub_joint = rospy.Publisher('/left_joint_states', JointState, queue_size=100)
         self.right_pub_joint = rospy.Publisher('/right_joint_states', JointState, queue_size=100)
-        # self.descartes_msgs = PosCmd()
+        self.descartes_msgs = PosCmd()
         
         # self.rate = rospy.Rate(80) # 10hz
 
@@ -115,6 +125,5 @@ if __name__ == '__main__':
     # piper = PIPER() 
     rospy.init_node('control_piper_node', anonymous=True)
     # piper.control_piper(0.0,0.0,0.0,0.0,0.0,0.0,0.05)
-    # piper.init_pose()
     # 保持节点运行并监听外部程序的调用
     rospy.spin()
