@@ -102,7 +102,7 @@ oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮
 
 [步骤1] 到meta商店安装Mobile VR Station 这个应用
 
-[步骤2] 把要安装的android apk 档案放到根目录Dowanload 里面(meta浏览器预设的下载目录) ，影片里建议直接安装apkpure 商店( [https://m.apkpure.com/tw/)](https://ref.gamer.com.tw/redir.php?url=https%3A%2F%2Fm.apkpure.com%2Ftw%2F))，即可之后都从apkpure 商店里面安装其他热门android 应用
+[步骤2] 把要安装的 android apk 文件
 
 [步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点两下进行安装
 
