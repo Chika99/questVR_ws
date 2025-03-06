@@ -44,10 +44,14 @@ sudo apt install android-tools-adb
 
   安装教程参考下面 [meta quest 安装 apk 的方法] 章节内容。
 
-3、将代码克隆到 ROS 下的工作空间：
+3、将代码克隆下来并编译：
 
 ```bash
-git clone https://github.com/RoboPPN/questVR.git
+git clone git@github.com:agilexrobotics/questVR_ws.git
+
+cd questVR_ws 
+
+catkin_make
 ```
 
 我们在 Ubuntu 20.04 上测试了我们的代码，其他操作系统可能需要不同的配置。
@@ -107,10 +111,6 @@ oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮
 [步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点两下进行安装
 
 ## 软件启动
-
-将上述克隆下来进行编译。
-
-### 启动
 
 1、使能机械臂can模块
 
