@@ -106,7 +106,7 @@ oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮
 
 [步骤1] 到meta商店安装Mobile VR Station 这个应用
 
-[步骤2] 把要安装的 android apk 文件
+[步骤2] 将 quest 与 pc 相连，开启 USB调试，在 pc 上显示新设备接入后，把要安装的 android apk 文件放到quest的 Dowanload 目录里面
 
 [步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点两下进行安装
 
