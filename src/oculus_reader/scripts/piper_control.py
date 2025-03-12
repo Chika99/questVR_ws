@@ -11,9 +11,9 @@ class PIPER:
         
         # 发布控制piper机械臂话题
         # self.pub_descartes = rospy.Publisher('pos_cmd', PosCmd, queue_size=10)
-        self.pub_joint = rospy.Publisher('/joint_states', JointState, queue_size=10)
-        self.left_pub_joint = rospy.Publisher('/left_joint_states', JointState, queue_size=100)
-        self.right_pub_joint = rospy.Publisher('/right_joint_states', JointState, queue_size=100)
+        self.pub_joint = rospy.Publisher('/joint_states', JointState, queue_size=1)
+        self.left_pub_joint = rospy.Publisher('/left_joint_states', JointState, queue_size=1)
+        self.right_pub_joint = rospy.Publisher('/right_joint_states', JointState, queue_size=1)
         # self.descartes_msgs = PosCmd()
         
         # self.rate = rospy.Rate(80) # 10hz
@@ -111,10 +111,10 @@ class PIPER:
     
      
 # test code
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # piper = PIPER() 
-    rospy.init_node('control_piper_node', anonymous=True)
+    # rospy.init_node('control_piper_node', anonymous=True)
     # piper.control_piper(0.0,0.0,0.0,0.0,0.0,0.0,0.05)
     # piper.init_pose()
     # 保持节点运行并监听外部程序的调用
-    rospy.spin()
+    # rospy.spin()

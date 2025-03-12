@@ -281,6 +281,7 @@ class Arm_IK:
 
 class VR:
     def __init__(self):
+        rospy.init_node('oculus_reader')
         self.piper_control = PIPER()
         self.tools = MATHTOOLS()
         self.inverse_solution = Arm_IK()
@@ -348,7 +349,7 @@ class VR:
         # 这里可选为 WIFI连接 或 USB连接
         # oculus_reader = OculusReader(ip_address='10.12.11.14')    #  WIFI连接
         oculus_reader = OculusReader()                              #  USB连接
-        rospy.init_node('oculus_reader')
+        
 
         rate = rospy.Rate(50)
         
