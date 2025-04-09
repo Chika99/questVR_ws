@@ -40,9 +40,17 @@ sudo apt install android-tools-adb
 
   点击：[oculus_reader](https://github.com/rail-berkeley/oculus_reader)
 
-- 在quest上安装alvr_client_android.apk文件，文件在代码里面的oculus_reader/apk目录下。
+- 在quest上安装`alvr_client_android.apk`和`teleop-debug.apk`文件，文件在代码里面的`oculus_reader/APK`目录下。
 
-  安装教程参考下面 [meta quest 安装 apk 的方法] 章节内容。
+  - [步骤1] 到meta商店安装Mobile VR Station 应用(联网)
+
+  - [步骤2] 将 quest 与 pc 相连，开启 USB调试，在 pc 上显示新设备接入后，把要上述 apk 文件下载并复制到 quest的 Dowanload 目录里面
+  
+  - [步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点击类似放大的按钮会弹出一个窗口，在弹出的窗口里点击安装
+ 
+- 如果上一步无法安装可以用如下链接中的方案，注意需要windows
+  - <https://www.bilibili.com/opus/267781439861047911>
+  - 其中的SideQuest app界面会更新，但是一定会有安装apk功能 <https://github.com/SideQuestVR/SideQuest/releases>
 
 3、将代码克隆下来并编译：
 
@@ -101,14 +109,6 @@ oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮
     ├── teleop_single_piper.py	#遥操作单臂代码
     └── tools.py
 ```
-
-## meta quest 安装 apk 的方法
-
-[步骤1] 到meta商店安装Mobile VR Station 这个应用
-
-[步骤2] 将 quest 与 pc 相连，开启 USB调试，在 pc 上显示新设备接入后，把要安装的 android apk 文件放到quest的 Dowanload 目录里面
-
-[步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点两下进行安装
 
 ## 软件启动
 
