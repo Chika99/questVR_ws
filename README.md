@@ -22,11 +22,10 @@ conda create -n vt python=3.9
 
 conda activate vt
 
-conda install pinocchio -c conda-forge
+conda install pinocchio==3.2.0 casadi==3.6.7 -c conda-forge
 
-pip install meshcat 
+pip install meshcat rospkg pyyaml
 
-pip install casadi
 
 sudo apt install android-tools-adb
 
