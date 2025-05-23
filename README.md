@@ -18,17 +18,15 @@
 1、安装依赖
 
 ```bash
+sudo apt install android-tools-adb
+
 conda create -n vt python=3.9
 
 conda activate vt
 
 conda install pinocchio==3.2.0 casadi==3.6.7 -c conda-forge
 
-pip install meshcat rospkg pyyaml
-
-
-sudo apt install android-tools-adb
-
+pip install meshcat rospkg pyyaml pure-python-adb piper-sdk
 ```
 
 2、配置您的 quest 设备
