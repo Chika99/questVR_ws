@@ -109,18 +109,73 @@ oculus_reader，该存储库提供了从 Quest 设备读取位置和按下按钮
 
 ## 软件启动
 
-1、使能机械臂can模块
+1、机械臂使能
 
-参考该库的2.1小结说明 [piper_ros](https://github.com/agilexrobotics/Piper_ros)
+**单piper使能**：
 
-- 如果是跑单臂的话将can端口名设置为can0
+将机械臂的can线接入电脑
 
-- 双臂的话就设置为left_piper、right_piper
+然后执行：
+
+```bash
+cd ~/questVR_ws/src/Piper_ros
+
+bash can_activate.sh can0 1000000
+```
+
+**左右双piper使能**：
+
+
+先将左机械臂的can线接入电脑
+
+然后执行：
+
+```bash
+cd ~/questVR_ws/src/Piper_ros
+
+bash find_all_can_port.sh 
+```
+
+终端会出现左机械臂的端口号，接着将右机械臂的can线接入电脑
+
+再次执行：
+
+```bash
+bash find_all_can_port.sh 
+```
+
+终端会出现左机械臂的端口号。
+
+将这左右两个端口号复制到 can_config.sh 文件的 111 和 112 行，如下所示：
+
+```bash
+# 预定义的 USB 端口、目标接口名称及其比特率（在多个 CAN 模块时使用）
+if [ "$EXPECTED_CAN_COUNT" -ne 1 ]; then
+    declare -A USB_PORTS 
+    USB_PORTS["1-8.1:1.0"]="left_piper:1000000"  #左机械臂
+    USB_PORTS["1-8.2:1.0"]="right_piper:1000000" #右机械臂
+fi
+```
+
+保存完毕后，激活左右机械臂使能脚本：
+
+```bash
+cd ~/questVR_ws/src/Piper_ros
+
+bash can_config.sh 
+```
+
 
 2、启动遥操机械臂
 
 ```bash
+source /home/agilex/questVR_ws/devel/setup.bash
+
+conda activate vt
+
 roslaunch oculus_reader teleop_single_piper.launch    # 单臂遥操
+
+or
 
 roslaunch oculus_reader teleop_double_piper.launch    # 双臂遥操
 ```
@@ -130,7 +185,8 @@ roslaunch oculus_reader teleop_double_piper.launch    # 双臂遥操
 > 注意⚠️：
 >
 > - 请一定要确保VR屏幕保持常亮，否则TF会乱飘导致遥操作机械臂乱飞，我们建议在VR眼镜里面拿东西遮住感应器，使其保持常亮状态。
-> - 请一定要确保手柄在VR视野里以及rviz里面的坐标稳定不会乱飘，然后按住按键“A”||“X”使机械臂复位，复位后才可进行遥操做，否则机械臂也会乱飞。
+> - 开启程序后，请一定要确保手柄在VR视野里以及rviz里面的坐标稳定不会乱飘，然后按住按键“A”||“X”使机械臂复位，复位后才可进行遥操做，否则机械臂也会乱飞。
+> - 在遥操 piper 启动后，请注意观察网页端的机械臂是否乱飘，
 
 - 遥操单臂使用右手手柄，开始遥操前确保机械臂回到初始姿态，按住按键 “A” 能使机械臂回到初始位置，长按按键 “B” 为遥操机械臂，松开为停止控制。遥操双臂同理。  
 
