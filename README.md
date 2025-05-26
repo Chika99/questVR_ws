@@ -180,6 +180,33 @@ or
 roslaunch oculus_reader teleop_double_piper.launch    # 双臂遥操
 ```
 
+在启动遥操代码时出现该错误时：
+
+```bash
+Device not found. Make sure that device is running and is connected over USB
+Run `adb devices` to verify that the device is visible.
+```
+
+说明了VR头盔未开启调试模式，开启调试模式方法步骤如下：
+
+1. 使用 USB-C 线将VR头盔连接到计算机，然后佩戴该设备。
+
+2. 当在通知中出现“检测到USB”，点击一下该通知。
+
+   ![img error](img/2.png)
+
+3. 第一次开启程序，会出现上面的报错。
+
+4. 当设备上出现提示时，接受**允许 USB 调试**和**始终允许从此计算机进行。**
+
+   ![img error](img/1.png)
+
+5. 关掉程序，再次运行。
+
+
+
+
+
 ## 操作说明
 
 > 注意⚠️：
