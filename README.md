@@ -15,7 +15,7 @@
 
 ### 准备工作 
 
-1、安装依赖
+一、安装依赖
 
 ```bash
 sudo apt install android-tools-adb
@@ -29,25 +29,60 @@ conda install pinocchio==3.2.0 casadi==3.6.7 -c conda-forge
 pip install meshcat rospkg pyyaml pure-python-adb piper-sdk
 ```
 
-2、配置您的 quest 设备
+二、开启开发者模式（必须步骤，否则无法安装第三方APK）
 
-- quest必须支持开发者模式
+开始前请确认自己 quest 设备中是否有开发者模式，请参考如下步骤查找：
 
-  如在 quest 设备上找不到开发者模式，请参考该链接配置 quest 设备。
+设置 → 高级 → 开发者 → 将 "启用开发者设置" 打开。
 
-  点击：[oculus_reader](https://github.com/rail-berkeley/oculus_reader)
+如果有，则跳过此步。
 
-- 在quest上安装`alvr_client_android.apk`和`teleop-debug.apk`文件，文件在代码里面的`oculus_reader/APK`目录下。
+如果没有开发者选项，则参考下面步骤进行激活。
+
+1、注册Meta开发者账号
+→ 访问 Meta开发者平台，用Meta账号登录后创建组织（名称随意），绑定信用卡完成验证。
+
+2、在手机App中开启开发者模式
+→ 打开手机端 Meta Quest App → 设备设置 → 开发者模式 → 开启开关。
+
+3、在头显中允许未知来源
+→ 头显内进入 设置 → 系统 → 开发者选项 → 开启 "未知来源"权限。
+
+三、设置头显休眠时长
+
+需要将休眠时长设置最大，以免头显息屏导致无法输出位姿数据。
+
+→ 头显内进入 设置 → 常规 → 电源 → 将"显示屏关闭时间" 调成 4 小时。
+
+四、在头显中安装 APK 文件 2 种方法（有网络与无网络）
+
+这里的有网络是指：国内用户需全程使用**稳定代理环境**（路由器代理/UU加速器/魔法热点），否则无法激活设备或访问Meta服务。
+
+1、无网络环境（推荐）
+
+- 建立连接：开启开发者模式后，用数据线连接Quest与电脑 → Quest弹出"允许USB调试"提示 → 授权后建立通道
+- 命令行输入：
+
+```bash
+adb install 路径/teleop-debug.apk
+```
+
+等待一段时间后，终端输出 Success 即安装成功。
+
+2、有稳定代理环境
+
+- 在quest上安装`teleop-debug.apk`文件，文件在`questVR_ws/src/oculus_reader/APK`目录下。
 
   - [步骤1] 到meta商店安装Mobile VR Station 应用(联网)
 
   - [步骤2] 将 quest 与 pc 相连，开启 USB调试，在 pc 上显示新设备接入后，把要上述 apk 文件下载并复制到 quest的 Dowanload 目录里面
-  
-  - [步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点击类似放大的按钮会弹出一个窗口，在弹出的窗口里点击安装
 
+  - [步骤3] 开启Mobile VR Station => Configuration Wizard => Show All Options => Configuration Scoped Storage => Step1: Request Access => 选择根目录Dowanload 里面刚刚步骤2放的apk 点击类似放大的按钮会弹出一个窗口，在弹出的窗口里点击安装
 - 如果上一步无法安装可以用如下链接中的方案，注意需要windows
   - <https://www.bilibili.com/opus/267781439861047911>
   - 其中的SideQuest app界面会更新，但是一定会有安装apk功能 <https://github.com/SideQuestVR/SideQuest/releases>
+
+
 
 3、将代码克隆下来并编译：
 
@@ -202,8 +237,6 @@ Run `adb devices` to verify that the device is visible.
    ![img error](img/1.png)
 
 5. 关掉程序，再次运行。
-
-
 
 
 
