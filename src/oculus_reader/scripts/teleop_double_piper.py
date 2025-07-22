@@ -17,7 +17,6 @@ import os
 import numpy as np
 import math
 
-from pinocchio_vr_single_piper import Arm_IK
 from tools import MATHTOOLS
 from piper_control import PIPER
 
@@ -357,7 +356,7 @@ class VR:
         # 这里可选为 WIFI连接 或 USB连接
         # oculus_reader = OculusReader(ip_address='10.12.11.14')    #  WIFI连接
         oculus_reader = OculusReader()                              #  USB连接
-        rospy.init_node('oculus_reader')
+        
 
         rate = rospy.Rate(50)
         
@@ -406,6 +405,7 @@ class VR:
             self.L_get_ik_solution(LL_[0],LL_[1],LL_[2],LL_[3],LL_[4],LL_[5],l_gripper_value,buttons['Y']) 
 
 if __name__ == '__main__':
+    rospy.init_node('oculus_reader')
     vr = VR()
     vr.Run()
     
