@@ -254,9 +254,47 @@ Run `adb devices` to verify that the device is visible.
 
 
 
+## 手柄按键说明
 
+按键值 button 可以通过下行代码获取到
 
+```bash
+transformations, buttons = oculus_reader.get_transformations_and_buttons()
+```
 
+以下数据是使用 `print("buttons:", buttons)` 打印 button 值的一帧数据：
+
+```python
+buttons: {'A': False, 'B': False, 'RThU': True, 'RJ': False, 'RG': False, 'RTr': False, 'X': False, 'Y': False, 'LThU': True, 'LJ': False, 'LG': False, 'LTr': False, 'leftJS': (0.0, 0.0), 'leftTrig': (0.0,), 'leftGrip': (0.0,), 'rightJS': (0.0, 0.0), 'rightTrig': (0.0,), 'rightGrip': (0.0,)}
+```
+
+### 按钮状态 (Booleans: `True`/`False`)
+
+这部分的值是布尔类型（`True` 或 `False`），`False` 表示按钮未被按下，`True` 表示按钮被按下。
+
+- **`'A': False`**: 右手柄的 "A" 按钮未被按下。
+- **`'B': False`**: 右手柄的 "B" 按钮未被按下。
+- **`'X': False`**: 左手柄的 "X" 按钮未被按下。
+- **`'Y': False`**: 左手柄的 "Y" 按钮未被按下。
+- **`'RThU': True`**: **R**ight **Th**umbstick **U**p。表示你的右拇指正放在右摇杆的电容传感器上，但并没有按下摇杆。
+- **`'LThU': True`**: **L**eft **Th**umbstick **U**p。表示你的左拇指正放在左摇杆的电容传感器上，但并没有按下摇杆。
+- **`'RJ': False`**: **R**ight **J**oystick (or Thumbstick) Click。右摇杆（拇指摇杆）没有被按下。
+- **`'LJ': False`**: **L**eft **J**oystick (or Thumbstick) Click。左摇杆（拇指摇杆）没有被按下。
+- **`'RG': False`**: **R**ight **G**rip。右侧握把键（中指按的键）没有被按下。
+- **`'LG': False`**: **L**eft **G**rip。左侧握把键（中指按的键）没有被按下。
+- **`'RTr': False`**: **R**ight **Tr**igger。右侧扳机键（食指按的键）没有被完全按下（通常有一个阈值来判断是否为 `True`）。
+- **`'LTr': False`**: **L**eft **Tr**igger。左侧扳机键（食指按的键）没有被完全按下。
+
+### 摇杆和传感器模拟值 (Tuples with Floats)
+
+这部分的值是浮点数元组，表示摇杆的偏离程度或扳机/握把的按压深度，范围通常在 0.0 到 1.0 之间，或 -1.0 到 1.0 之间。
+
+- **`'leftJS': (0.0, 0.0)`**: 左摇杆 (Left Joystick) 的状态。这是一个包含两个浮点数的元组 `(x, y)`，分别代表水平和垂直方向的偏离。`(0.0, 0.0)` 表示摇杆处于中心位置，没有被推动。
+- **`'rightJS': (0.0, 0.0)`**: 右摇杆 (Right Joystick) 的状态。同上，`(0.0, 0.0)` 表示摇杆处于中心位置。
+- **`'leftTrig': (0.0,)`**: 左扳机键 (Left Trigger) 的按压深度。`0.0` 表示完全松开，`1.0` 表示完全按下。
+- **`'rightTrig': (0.0,)`**: 右扳机键 (Right Trigger) 的按压深度。`0.0` 表示完全松开。
+- **`'leftGrip': (0.0,)`**: 左握把键 (Left Grip) 的按压深度。`0.0` 表示完全松开，`1.0` 表示完全按下。
+- **`'rightGrip': (0.0,)`**: 右握把键 (Right Grip) 的按压深度。`0.0` 表示完全松开。
 
 
 
