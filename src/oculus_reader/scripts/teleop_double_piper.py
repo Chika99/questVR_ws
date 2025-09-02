@@ -22,13 +22,13 @@ from tools import MATHTOOLS
 from piper_control import PIPER
 
 class PoseFilter:
-    def __init__(self, window_size=8, alpha=0.15):
+    def __init__(self, window_size=4, alpha=0.4):
         self.window_size = window_size
         self.alpha = alpha
         self.pose_history = deque(maxlen=window_size)
         self.last_filtered_pose = None
         self.last_output_pose = None
-        self.motion_threshold = 0.002
+        self.motion_threshold = 0.001
         self.stable_count = 0
         
     def filter_pose(self, pose):
@@ -55,13 +55,13 @@ class PoseFilter:
         
         if max_change < self.motion_threshold:
             self.stable_count += 1
-            if self.stable_count > 5:
+            if self.stable_count > 3:
                 return self.last_output_pose.tolist()
         else:
             self.stable_count = 0
             
-        if max_change > 0.03:
-            filtered_pose = self.last_filtered_pose + 0.03 * np.sign(filtered_pose - self.last_filtered_pose)
+        if max_change > 0.08:
+            filtered_pose = self.last_filtered_pose + 0.08 * np.sign(filtered_pose - self.last_filtered_pose)
         
         self.last_filtered_pose = filtered_pose.copy()
         self.last_output_pose = filtered_pose.copy()
@@ -246,9 +246,9 @@ class Arm_IK:
         opts = {
             'ipopt': {
                 'print_level': 0,
-                'max_iter': 30,
+                'max_iter': 40,
                 'tol': 1e-3,
-                'acceptable_tol': 1e-2,
+                'acceptable_tol': 5e-3,
                 'dual_inf_tol': 1e-1,
                 'constr_viol_tol': 1e-3,
                 'compl_inf_tol': 1e-3
@@ -363,8 +363,8 @@ class VR:
         self.left_last_pose = None
         self.right_stable_pose = None
         self.left_stable_pose = None
-        self.position_deadzone = 0.003
-        self.rotation_deadzone = 0.01
+        self.position_deadzone = 0.001
+        self.rotation_deadzone = 0.005
         
         self.piper_control.left_init_pose()
         self.piper_control.right_init_pose()
