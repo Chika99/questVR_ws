@@ -22,11 +22,14 @@ from tools import MATHTOOLS
 from piper_control import PIPER
 
 class PoseFilter:
-    def __init__(self, window_size=5, alpha=0.3):
+    def __init__(self, window_size=8, alpha=0.15):
         self.window_size = window_size
         self.alpha = alpha
         self.pose_history = deque(maxlen=window_size)
         self.last_filtered_pose = None
+        self.last_output_pose = None
+        self.motion_threshold = 0.002
+        self.stable_count = 0
         
     def filter_pose(self, pose):
         if len(pose) != 6:
@@ -37,6 +40,7 @@ class PoseFilter:
         
         if self.last_filtered_pose is None:
             self.last_filtered_pose = pose_array.copy()
+            self.last_output_pose = pose_array.copy()
             return pose
         
         if len(self.pose_history) < 3:
@@ -46,11 +50,21 @@ class PoseFilter:
         
         filtered_pose = self.alpha * moving_avg + (1 - self.alpha) * self.last_filtered_pose
         
-        max_change = np.max(np.abs(filtered_pose - self.last_filtered_pose))
-        if max_change > 0.05:
-            filtered_pose = self.last_filtered_pose + 0.05 * np.sign(filtered_pose - self.last_filtered_pose)
+        pose_change = np.abs(filtered_pose - self.last_filtered_pose)
+        max_change = np.max(pose_change)
+        
+        if max_change < self.motion_threshold:
+            self.stable_count += 1
+            if self.stable_count > 5:
+                return self.last_output_pose.tolist()
+        else:
+            self.stable_count = 0
+            
+        if max_change > 0.03:
+            filtered_pose = self.last_filtered_pose + 0.03 * np.sign(filtered_pose - self.last_filtered_pose)
         
         self.last_filtered_pose = filtered_pose.copy()
+        self.last_output_pose = filtered_pose.copy()
         return filtered_pose.tolist()
 
 def matrix_to_xyzrpy(matrix):
@@ -232,8 +246,12 @@ class Arm_IK:
         opts = {
             'ipopt': {
                 'print_level': 0,
-                'max_iter': 50,
-                'tol': 1e-4
+                'max_iter': 30,
+                'tol': 1e-3,
+                'acceptable_tol': 1e-2,
+                'dual_inf_tol': 1e-1,
+                'constr_viol_tol': 1e-3,
+                'compl_inf_tol': 1e-3
             },
             'print_time': False
         }
@@ -340,6 +358,14 @@ class VR:
         self.L_inverse_solution = Arm_IK()
         self.right_pose_filter = PoseFilter()
         self.left_pose_filter = PoseFilter()
+        
+        self.right_last_pose = None
+        self.left_last_pose = None
+        self.right_stable_pose = None
+        self.left_stable_pose = None
+        self.position_deadzone = 0.003
+        self.rotation_deadzone = 0.01
+        
         self.piper_control.left_init_pose()
         self.piper_control.right_init_pose()
 
@@ -382,6 +408,24 @@ class VR:
         t.transform.rotation.w = quat[3]
 
         br.sendTransform(t)
+    
+    def apply_deadzone(self, current_pose, last_pose, stable_pose):
+        if last_pose is None:
+            return current_pose, current_pose
+            
+        current_array = np.array(current_pose)
+        last_array = np.array(last_pose)
+        
+        pos_diff = np.abs(current_array[:3] - last_array[:3])
+        rot_diff = np.abs(current_array[3:] - last_array[3:])
+        
+        if np.max(pos_diff) < self.position_deadzone and np.max(rot_diff) < self.rotation_deadzone:
+            if stable_pose is not None:
+                return stable_pose, stable_pose
+            else:
+                return last_pose, current_pose
+        else:
+            return current_pose, current_pose
     
     def R_get_ik_solution(self, x,y,z,roll,pitch,yaw,gripper,b):
         
@@ -459,13 +503,19 @@ class VR:
             RR_filtered = self.right_pose_filter.filter_pose(RR_)
             LL_filtered = self.left_pose_filter.filter_pose(LL_)
             
+            RR_final, self.right_stable_pose = self.apply_deadzone(RR_filtered, self.right_last_pose, self.right_stable_pose)
+            LL_final, self.left_stable_pose = self.apply_deadzone(LL_filtered, self.left_last_pose, self.left_stable_pose)
+            
+            self.right_last_pose = RR_filtered
+            self.left_last_pose = LL_filtered
+            
             
             r_gripper_value = buttons['rightTrig'][0] * 0.07  #右夹爪值
             l_gripper_value = buttons['leftTrig'][0] * 0.07   #左夹爪值
             
             # 按下B、Y键开始遥操作
-            self.R_get_ik_solution(RR_filtered[0],RR_filtered[1],RR_filtered[2],RR_filtered[3],RR_filtered[4],RR_filtered[5],r_gripper_value,buttons['B'])
-            self.L_get_ik_solution(LL_filtered[0],LL_filtered[1],LL_filtered[2],LL_filtered[3],LL_filtered[4],LL_filtered[5],l_gripper_value,buttons['Y']) 
+            self.R_get_ik_solution(RR_final[0],RR_final[1],RR_final[2],RR_final[3],RR_final[4],RR_final[5],r_gripper_value,buttons['B'])
+            self.L_get_ik_solution(LL_final[0],LL_final[1],LL_final[2],LL_final[3],LL_final[4],LL_final[5],l_gripper_value,buttons['Y']) 
 
 if __name__ == '__main__':
     rospy.init_node('oculus_reader')
