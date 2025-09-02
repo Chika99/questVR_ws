@@ -16,9 +16,41 @@ from oculus_reader import OculusReader
 import os
 import numpy as np
 import math
+from collections import deque
 
 from tools import MATHTOOLS
 from piper_control import PIPER
+
+class PoseFilter:
+    def __init__(self, window_size=5, alpha=0.3):
+        self.window_size = window_size
+        self.alpha = alpha
+        self.pose_history = deque(maxlen=window_size)
+        self.last_filtered_pose = None
+        
+    def filter_pose(self, pose):
+        if len(pose) != 6:
+            return pose
+            
+        self.pose_history.append(pose.copy())
+        
+        if self.last_filtered_pose is None:
+            self.last_filtered_pose = pose.copy()
+            return pose
+        
+        if len(self.pose_history) < 3:
+            return pose
+            
+        moving_avg = np.mean(self.pose_history, axis=0)
+        
+        filtered_pose = self.alpha * moving_avg + (1 - self.alpha) * self.last_filtered_pose
+        
+        max_change = np.max(np.abs(np.array(filtered_pose) - np.array(self.last_filtered_pose)))
+        if max_change > 0.05:
+            filtered_pose = self.last_filtered_pose + 0.05 * np.sign(np.array(filtered_pose) - np.array(self.last_filtered_pose))
+        
+        self.last_filtered_pose = filtered_pose.copy()
+        return filtered_pose.tolist()
 
 def matrix_to_xyzrpy(matrix):
     x = matrix[0, 3]
@@ -109,6 +141,8 @@ class Arm_IK:
 
         self.init_data = np.zeros(self.reduced_robot.model.nq)
         self.history_data = np.zeros(self.reduced_robot.model.nq)
+        self.valid_solution_history = deque(maxlen=10)
+        self.failed_count = 0
 
         # # Initialize the Meshcat visualizer  for visualization
         self.vis = MeshcatVisualizer(self.reduced_robot.model, self.reduced_robot.collision_model, self.reduced_robot.visual_model)
@@ -222,13 +256,28 @@ class Arm_IK:
 
             if self.init_data is not None:
                 max_diff = max(abs(self.history_data - sol_q))
-                # print("max_diff:", max_diff)
+                
+                if max_diff > 15.0/180.0*3.1415:
+                    if len(self.valid_solution_history) > 0:
+                        last_valid = self.valid_solution_history[-1]
+                        interpolation_factor = 0.3
+                        sol_q = interpolation_factor * sol_q + (1 - interpolation_factor) * last_valid
+                        max_diff = max(abs(self.history_data - sol_q))
+                
+                if max_diff > 25.0/180.0*3.1415:
+                    print("Excessive changes in joint angle:", max_diff)
+                    if len(self.valid_solution_history) > 0:
+                        sol_q = self.valid_solution_history[-1]
+                    else:
+                        self.init_data = np.zeros(self.reduced_robot.model.nq)
+                        sol_q = self.init_data
+                
                 self.init_data = sol_q
-                if max_diff > 30.0/180.0*3.1415:
-                    # print("Excessive changes in joint angle:", max_diff)
-                    self.init_data = np.zeros(self.reduced_robot.model.nq)
+                self.valid_solution_history.append(sol_q.copy())
+                self.failed_count = 0
             else:
                 self.init_data = sol_q
+                self.valid_solution_history.append(sol_q.copy())
             self.history_data = sol_q
 
             self.vis.display(sol_q)  # for visualization
@@ -248,8 +297,16 @@ class Arm_IK:
 
         except Exception as e:
             print(f"ERROR in convergence, plotting debug info.{e}")
-            # sol_q = self.opti.debug.value(self.var_q)   # return original value
-            return None, '', False
+            self.failed_count += 1
+            
+            if len(self.valid_solution_history) > 0 and self.failed_count < 5:
+                sol_q = self.valid_solution_history[-1]
+                tau_ff = pin.rnea(self.reduced_robot.model, self.reduced_robot.data, sol_q, 
+                                np.zeros(self.reduced_robot.model.nv), 
+                                np.zeros(self.reduced_robot.model.nv))
+                return sol_q, tau_ff, True
+            else:
+                return None, '', False
 
     def check_self_collision(self, q, gripper=np.array([0, 0])):
         pin.forwardKinematics(self.robot.model, self.robot.data, np.concatenate([q, gripper], axis=0))
@@ -280,6 +337,8 @@ class VR:
         self.tools = MATHTOOLS()
         self.R_inverse_solution = Arm_IK()
         self.L_inverse_solution = Arm_IK()
+        self.right_pose_filter = PoseFilter()
+        self.left_pose_filter = PoseFilter()
         self.piper_control.left_init_pose()
         self.piper_control.right_init_pose()
 
@@ -358,7 +417,7 @@ class VR:
         oculus_reader = OculusReader()                              #  USB连接
         
 
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(100)
         
         # 夹爪坐标系到到基坐标系的变换
         base_RR = [0.19, 0.0, 0.2, 0, 0, 0]
@@ -396,13 +455,16 @@ class VR:
             RR_ = calc_pose_incre(base_RR,RR)
             LL_ = calc_pose_incre(base_LL,LL)
             
+            RR_filtered = self.right_pose_filter.filter_pose(RR_)
+            LL_filtered = self.left_pose_filter.filter_pose(LL_)
+            
             
             r_gripper_value = buttons['rightTrig'][0] * 0.07  #右夹爪值
             l_gripper_value = buttons['leftTrig'][0] * 0.07   #左夹爪值
             
             # 按下B、Y键开始遥操作
-            self.R_get_ik_solution(RR_[0],RR_[1],RR_[2],RR_[3],RR_[4],RR_[5],r_gripper_value,buttons['B'])
-            self.L_get_ik_solution(LL_[0],LL_[1],LL_[2],LL_[3],LL_[4],LL_[5],l_gripper_value,buttons['Y']) 
+            self.R_get_ik_solution(RR_filtered[0],RR_filtered[1],RR_filtered[2],RR_filtered[3],RR_filtered[4],RR_filtered[5],r_gripper_value,buttons['B'])
+            self.L_get_ik_solution(LL_filtered[0],LL_filtered[1],LL_filtered[2],LL_filtered[3],LL_filtered[4],LL_filtered[5],l_gripper_value,buttons['Y']) 
 
 if __name__ == '__main__':
     rospy.init_node('oculus_reader')
