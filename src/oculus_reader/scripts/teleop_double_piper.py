@@ -32,10 +32,11 @@ class PoseFilter:
         if len(pose) != 6:
             return pose
             
-        self.pose_history.append(pose.copy())
+        pose_array = np.array(pose)
+        self.pose_history.append(pose_array.copy())
         
         if self.last_filtered_pose is None:
-            self.last_filtered_pose = pose.copy()
+            self.last_filtered_pose = pose_array.copy()
             return pose
         
         if len(self.pose_history) < 3:
@@ -45,9 +46,9 @@ class PoseFilter:
         
         filtered_pose = self.alpha * moving_avg + (1 - self.alpha) * self.last_filtered_pose
         
-        max_change = np.max(np.abs(np.array(filtered_pose) - np.array(self.last_filtered_pose)))
+        max_change = np.max(np.abs(filtered_pose - self.last_filtered_pose))
         if max_change > 0.05:
-            filtered_pose = self.last_filtered_pose + 0.05 * np.sign(np.array(filtered_pose) - np.array(self.last_filtered_pose))
+            filtered_pose = self.last_filtered_pose + 0.05 * np.sign(filtered_pose - self.last_filtered_pose)
         
         self.last_filtered_pose = filtered_pose.copy()
         return filtered_pose.tolist()
